@@ -186,8 +186,8 @@ const Places = () => {
             accept=".xlsx"
             className="form-input"
           />
-          <button type="button" onClick={handleFileUpload} className="form-button">Import Excel</button>
         </div>
+        <button type="button" onClick={handleFileUpload} className="form-button">Import Excel</button>
         <button type="submit" className='form-button'>Submit</button>
         <button type="button" onClick={() => exportToExcel(results)} className="form-button">Export Excel</button>
       </form>
