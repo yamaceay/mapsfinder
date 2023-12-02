@@ -40,25 +40,6 @@ const Places = () => {
     setFile(e.target.files[0]);
   };
 
-  const handleFileUpload = () => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const response = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(response, {type: 'array'});
-      const sheet_name_list = workbook.SheetNames;
-      const sheet = workbook.Sheets[sheet_name_list[0]];
-      const raw_data = XLSX.utils.sheet_to_json(sheet);
-      const data = raw_data.map(item => {
-        const name = item[nameKey];
-        const address = item[addressKey];
-        const phone = item[phoneKey];
-        return {name, address, phone};
-      });
-      setData(data);
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
   const exportToExcel = (arrayOfObjects) => {
     const newArrayOfObjects = arrayOfObjects
       .filter(item => dataByAddress[item.address] ? false : true)
@@ -103,6 +84,25 @@ const Places = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const response = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(response, {type: 'array'});
+        const sheet_name_list = workbook.SheetNames;
+        const sheet = workbook.Sheets[sheet_name_list[0]];
+        const raw_data = XLSX.utils.sheet_to_json(sheet);
+        const data = raw_data.map(item => {
+          const name = item[nameKey];
+          const address = item[addressKey];
+          const phone = item[phoneKey];
+          return {name, address, phone};
+        });
+        setData(data);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
     const loc_uri = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(searchText)}&limit=1&apiKey=${process.env.REACT_APP_API_KEY}`;
 
     axios.get(loc_uri)
@@ -125,8 +125,10 @@ const Places = () => {
                 }}}) => (
                 {name, address, phone, email, website}
               ))
+              .filter(({name, address}) => name && address)
               .map(({name, address, phone, email, website}) => {
-                return {name, "address": address.replace(/, Germany$/, ""), phone, email, website};
+                const addressFormatted = address.replace(/, Germany$/, "");
+                return {name, address: addressFormatted, phone, email, website};
               })
               setResults(results);
           })
@@ -187,7 +189,6 @@ const Places = () => {
             className="form-input"
           />
         </div>
-        <button type="button" onClick={handleFileUpload} className="form-button">Import Excel</button>
         <button type="submit" className='form-button'>Submit</button>
         <button type="button" onClick={() => exportToExcel(results)} className="form-button">Export Excel</button>
       </form>
