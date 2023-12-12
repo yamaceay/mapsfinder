@@ -42,7 +42,9 @@ const Places = () => {
 
   const exportToExcel = (arrayOfObjects) => {
     const newArrayOfObjects = arrayOfObjects
-      .filter(item => dataByAddress[item.address] ? false : true)
+      .filter(item => dataByAddress[item.address] ? false : true);
+
+    const exportedObjects = [...data, ...newArrayOfObjects]
       .map(item => {
         const {name, address, phone} = item;
         const newItem = {};
@@ -52,7 +54,7 @@ const Places = () => {
         return newItem;
       });
 
-    const worksheet = XLSX.utils.json_to_sheet(newArrayOfObjects);
+    const worksheet = XLSX.utils.json_to_sheet(exportedObjects);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
     XLSX.writeFile(workbook, db);
